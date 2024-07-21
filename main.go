@@ -13,11 +13,9 @@ func main() { // entry point function: Run command --> go run .\main.go
 
 	done := make(chan struct{}) // creating a channel to prevent race condition
 	go func() {
-		genesisBlock := src.NewGenesisBlock()
-		spew.Dump(genesisBlock)
 
 		bc := src.GetBlockchainInstance()
-		bc.AddBlock(genesisBlock)
+		spew.Dump(bc.Blocks[0])
 		fmt.Println("Length of blockchain: ", len(bc.Blocks))
 	}()
 	close(done)

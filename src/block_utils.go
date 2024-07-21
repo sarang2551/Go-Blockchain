@@ -10,7 +10,7 @@ import (
 
 type Block struct {
 	Timestamp     int64
-	Data          []byte
+	Data          string
 	PrevBlockHash []byte
 	Hash          []byte
 	Index         int64
@@ -19,14 +19,14 @@ type Block struct {
 /* take block fields, concatenate them, and calculate a SHA-256 hash on the concatenated combination*/
 func (b *Block) SetHash() []byte {
 	timestamp := []byte(strconv.FormatInt(b.Timestamp, 10))
-	headers := bytes.Join([][]byte{b.PrevBlockHash, b.Data, timestamp}, []byte{})
+	headers := bytes.Join([][]byte{b.PrevBlockHash, []byte(b.Data), timestamp}, []byte{})
 	hash := sha256.Sum256(headers)
 	b.Hash = hash[:]
 	return hash[:]
 }
 
 func NewBlock(oldBlock Block, data string) *Block {
-	block := &Block{time.Now().Unix(), []byte(data), oldBlock.Hash, []byte{}, oldBlock.Index + 1}
+	block := &Block{time.Now().Unix(), data, oldBlock.Hash, []byte{}, oldBlock.Index + 1}
 	block.SetHash()
 	return block
 }
@@ -34,12 +34,11 @@ func NewBlock(oldBlock Block, data string) *Block {
 // NewGenesisBlock creates and returns genesis Block
 func NewGenesisBlock() *Block {
 	var genesisBlock = new(Block)
-	genesisBlock.Data = []byte("GenesisBlock")
+	genesisBlock.Data = "GenesisBlock"
 	genesisBlock.Timestamp = time.Now().Unix()
 	genesisBlock.Index = 0
 	genesisBlock.Hash = []byte{} // empty hash as there is no previous block
-	genesisBlock.PrevBlockHash = []byte{}
-	genesisBlock.SetHash()
+	genesisBlock.PrevBlockHash = genesisBlock.SetHash()
 	return genesisBlock
 }
 
