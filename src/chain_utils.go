@@ -5,14 +5,13 @@ import (
 	"sync"
 )
 
+var lock = &sync.Mutex{}
+
 type Blockchain struct {
 	Blocks []*Block
 }
 
-type BlockchainManager struct {
-	instance *Blockchain
-	once     sync.Once
-}
+var blockchainInstance *Blockchain
 
 // AddBlock saves provided data as a block in the blockchain
 func (bc *Blockchain) AddBlock(newBlock *Block) {
@@ -27,13 +26,21 @@ func (bc *Blockchain) GetLastBlock() (*Block, error) {
 }
 
 // Getting the Singleton instance of the blockchain
-func (bcm *BlockchainManager) GetInstance() *Blockchain {
-	bcm.once.Do(func() {
-		bcm.instance = &Blockchain{}
-	})
-	return bcm.instance
-}
+func GetBlockchainInstance() *Blockchain {
+	if blockchainInstance == nil {
+		lock.Lock()
+		defer lock.Unlock()
+		if blockchainInstance == nil {
+			fmt.Println("Creating single instance now.")
+			blockchainInstance = &Blockchain{}
+			fmt.Println("Adding genesis block...")
+			blockchainInstance.AddBlock(NewGenesisBlock())
+		} else {
+			fmt.Println("Single instance already created.")
+		}
+	} else {
+		fmt.Println("Single instance already created.")
+	}
 
-func NewBCM() *BlockchainManager {
-	return &BlockchainManager{}
+	return blockchainInstance
 }

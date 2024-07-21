@@ -45,7 +45,8 @@ func makeMuxRouter() http.Handler {
 }
 
 func handleGetBlockchain(w http.ResponseWriter, r *http.Request) {
-	bc := NewBCM().GetInstance()
+	bc := GetBlockchainInstance()
+	fmt.Println("Length of GET blockchain", len(bc.Blocks))
 	bytes, err := json.MarshalIndent(bc.Blocks, "", "  ")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -59,12 +60,14 @@ func handleWriteBlock(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&m); err != nil {
+		fmt.Println(err)
 		respondWithJSON(w, r, http.StatusBadRequest, r.Body)
 		return
 	}
 	// release the resources
 	defer r.Body.Close()
-	bc := NewBCM().GetInstance()
+
+	bc := GetBlockchainInstance()
 	oldBlock, err := bc.GetLastBlock()
 	if err != nil {
 		respondWithJSON(w, r, http.StatusInternalServerError, m)
@@ -76,7 +79,7 @@ func handleWriteBlock(w http.ResponseWriter, r *http.Request) {
 	if isBlockValid(*newBlock, *oldBlock) {
 		bc.AddBlock(newBlock)
 	}
-
+	fmt.Println("Adding a new block...")
 	respondWithJSON(w, r, http.StatusCreated, newBlock)
 
 }
