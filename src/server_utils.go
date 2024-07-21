@@ -75,11 +75,11 @@ func handleWriteBlock(w http.ResponseWriter, r *http.Request) {
 	}
 
 	newBlock := NewBlock(*oldBlock, m.Data)
-
+	// validate the new block
 	if isBlockValid(*newBlock, *oldBlock) {
 		bc.AddBlock(newBlock)
 	}
-	fmt.Println("Adding a new block...")
+	fmt.Println("Adding a new block...new chain length now being: ", len(bc.Blocks))
 	respondWithJSON(w, r, http.StatusCreated, newBlock)
 
 }

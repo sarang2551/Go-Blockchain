@@ -3,6 +3,7 @@ package src
 import (
 	"bytes"
 	"crypto/sha256"
+	"fmt"
 	"strconv"
 	"time"
 )
@@ -43,15 +44,18 @@ func NewGenesisBlock() *Block {
 }
 
 func isBlockValid(newBlock, oldBlock Block) bool {
-	if oldBlock.Index-1 != newBlock.Index {
+	if oldBlock.Index+1 != newBlock.Index {
+		fmt.Println("Invalid index")
 		return false
 	}
 	// check that the connection between the old and new blocks are valid
 	if !bytes.Equal(oldBlock.Hash, newBlock.PrevBlockHash) {
+		fmt.Println("Invalid hash connection")
 		return false
 	}
 	// hash integrity check
 	if !bytes.Equal(newBlock.SetHash(), newBlock.Hash) {
+		fmt.Println("Failed hash integrity")
 		return false
 	}
 	return true
